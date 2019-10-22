@@ -74,16 +74,17 @@ public static void main(String[]args) {
 					readyList.add(blockedList.get(y));
 				}
 			}
+			if (readyList.size()==0) {
+				contextSwitch(processor, blockedList, readyList, currentPCB);
+			}
 		}
 	}
 
 private static void contextSwitch(SimProcessor processor, ArrayList<ProcessControlBlock> blockedList,
 	ArrayList<ProcessControlBlock> readyList, ProcessControlBlock currentPCB) {
 	contextSwitchSave(currentPCB, processor, blockedList);
-	ProcessControlBlock toRestore=blockedList.get(0);
+	ProcessControlBlock toRestore=readyList.get(0);
 	contextSwitchRestore(toRestore);
-	readyList.add(toRestore);
-	blockedList.remove(toRestore);
 }
 
 private static void contextSwitchRestore(ProcessControlBlock toRestore) {
