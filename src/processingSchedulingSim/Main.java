@@ -12,9 +12,9 @@ public static void main(String[]args) {
 	ArrayList<ProcessControlBlock>finishedList= new ArrayList<ProcessControlBlock>();
 	fillLists(readyList, blockedList);
 	int instructionIterator=0;
-	for(int x=0; x<3000;x++) {
+	for(int x=0; x<2999;x++) {
+		System.out.print("Step "+(x+1)+": ");
 		if(!readyList.isEmpty()) {
-			System.out.print("Step "+(x+1)+": ");
 			ProcessControlBlock currentPCB= readyList.get(0);
 			processor.setCurrentProcess(currentPCB.getCurrentProc());
 			processor.setCurrInstruction(currentPCB.getCurrInstruction());
@@ -24,6 +24,8 @@ public static void main(String[]args) {
 				System.out.println("Process "+currentPCB.getCurrentProc().toString()+" finished.");
 				finishedList.add(currentPCB);
 				readyList.remove(currentPCB);
+				x++;
+				System.out.print("Step "+(x+1)+": ");
 				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
@@ -34,6 +36,8 @@ public static void main(String[]args) {
 					System.out.println("***Quantum Expired***");
 					readyList.add(currentPCB);
 					readyList.remove(currentPCB);
+					x++;
+					System.out.print("Step "+(x+1)+": ");
 					contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 					instructionIterator=0;
 				}
@@ -42,6 +46,8 @@ public static void main(String[]args) {
 				System.out.println("***Process Blocked***");
 				blockedList.add(currentPCB);
 				readyList.remove(currentPCB);
+				x++;
+				System.out.print("Step "+(x+1)+": ");
 				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
@@ -59,10 +65,6 @@ public static void main(String[]args) {
 		}
 			wakeupProcess(blockedList, readyList);
 		}
-	System.out.print("Finished Processes: ");
-	for(int w=0; w<finishedList.size(); w++) {
-		finishedList.get(w).getCurrentProc().toString();
-	}
 	System.exit(0);
 	}
 private static void contextSwitch(SimProcessor processor, ArrayList<ProcessControlBlock> blockedList,
@@ -73,7 +75,7 @@ private static void contextSwitch(SimProcessor processor, ArrayList<ProcessContr
 	currentPCB.setRegister2(processor.getRegister2());
 	currentPCB.setRegister3(processor.getRegister3());
 	currentPCB.setRegister4(processor.getRegister4());
-	System.out.println("***Context Switch: saving process "+currentPCB.getCurrentProc().toString()+"\n\t Instruction "+ 
+	System.out.println("\t***Context Switch: saving process "+currentPCB.getCurrentProc().toString()+"\n\t Instruction "+ 
 	processor.getCurrInstruction()+ " R1: "+currentPCB.getRegister1()+" R2: "+currentPCB.getRegister2()+" R3: "
 			+currentPCB.getRegister3()+ " R4: "+currentPCB.getRegister4());
 	if(readyList.isEmpty()) {
@@ -99,7 +101,7 @@ private static void wakeupProcess(ArrayList<ProcessControlBlock> blockedList,
 }
 
 private static void restore(ProcessControlBlock toRestore) {
-	System.out.println("***Context Switch: restoring process "+toRestore.getCurrentProc().toString()+"\n\t Instruction "+ 
+	System.out.println("\t***Context Switch: restoring process "+toRestore.getCurrentProc().toString()+"\n\t Instruction "+ 
 			toRestore.getCurrInstruction()+ " R1: "+toRestore.getRegister1()+" R2: "+toRestore.getRegister2()+" R3: "
 					+toRestore.getRegister3()+ " R4: "+toRestore.getRegister4());
 }
