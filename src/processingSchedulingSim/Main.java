@@ -31,6 +31,7 @@ public static void main(String[]args) {
 				if(instructionIterator==QUANTUM) {
 					System.out.println("***Quantum Expired***");
 					readyList.add(currentPCB);
+					readyList.remove(currentPCB);
 					contextSwitch(processor, blockedList, readyList, currentPCB);
 					instructionIterator=0;
 				}
