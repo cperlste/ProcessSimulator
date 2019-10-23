@@ -4,14 +4,12 @@ import java.util.Random;
 
 public class ProcessControlBlock {
 	private SimProcess currentProc;
-	
 	private int currInstruction;
 	private int register1;
 	private int register2;
 	private int register3;
 	private int register4;
-	private Random randomGen= new Random();
-	
+
 	public ProcessControlBlock(SimProcess currentProc) {
 		this.currentProc=currentProc;
 		register1=0;
@@ -47,9 +45,6 @@ public class ProcessControlBlock {
 	}
 	public void setCurrInstruction(int currInstruction) {
 		this.currInstruction = currInstruction;
-	}
-	public int getRegisterValue() {
-		return randomGen.nextInt();
 	}
 	public void setRegister1(int register1) {
 		this.register1 = register1;
