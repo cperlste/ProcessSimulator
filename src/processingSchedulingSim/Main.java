@@ -22,6 +22,8 @@ public static void main(String[]args) {
 			switch (state){
 			case FINISHED:
 				System.out.println("Process "+currentPCB.getCurrentProc().toString()+" finished.");
+				finishedList.add(currentPCB);
+				readyList.remove(currentPCB);
 				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
@@ -30,13 +32,16 @@ public static void main(String[]args) {
 				currentPCB.setCurrInstruction(processor.getCurrInstruction());
 				if(instructionIterator==QUANTUM) {
 					System.out.println("***Quantum Expired***");
+					readyList.add(currentPCB);
+					readyList.remove(currentPCB);
 					contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 					instructionIterator=0;
 				}
 				break;
 			case BLOCKED:
-				blockedList.add(currentPCB);
 				System.out.println("***Process Blocked***");
+				blockedList.add(currentPCB);
+				readyList.remove(currentPCB);
 				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
@@ -60,29 +65,10 @@ public static void main(String[]args) {
 	}
 	System.exit(0);
 	}
-
-
-
 private static void contextSwitch(SimProcessor processor, ArrayList<ProcessControlBlock> blockedList,
 	ArrayList<ProcessControlBlock> readyList, ProcessControlBlock currentPCB, ProcessState state, ArrayList<ProcessControlBlock> finishedList) {
 	
 	currentPCB.setCurrInstruction(processor.getCurrInstruction());
-	switch(state) {
-	case FINISHED:
-		finishedList.add(currentPCB);
-		readyList.remove(currentPCB);
-		break;
-	case READY:
-		readyList.add(currentPCB);
-		readyList.remove(currentPCB);
-		break;
-	case BLOCKED:
-		blockedList.add(currentPCB);
-		readyList.remove(currentPCB);
-		break;
-	default:
-		break;
-	}	
 	currentPCB.setRegister1(processor.getRegister1());
 	currentPCB.setRegister2(processor.getRegister2());
 	currentPCB.setRegister3(processor.getRegister3());
