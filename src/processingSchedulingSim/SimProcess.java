@@ -12,16 +12,16 @@ public class SimProcess {
 		this.procName=procName;
 		this.totalInstructions=totalInstructions;
 	}
-	public ProcessorState execute(int i) {
+	public ProcessState execute(int i) {
 		System.out.println("PID: "+pID+" Process Name: "+procName+" Instruction Number: "+ i);
 		if(i>=totalInstructions) {
-			return ProcessorState.FINISHED;
+			return ProcessState.FINISHED;
 		}
 		else if (randomGen.nextDouble()<.15){
-			return ProcessorState.BLOCKED;
+			return ProcessState.BLOCKED;
 		}
 		else {
-			return ProcessorState.READY;
+			return ProcessState.READY;
 		}
 	}
 	public int getPID() {

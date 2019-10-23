@@ -38,9 +38,9 @@ public class SimProcessor {
 	public void setCurrInstruction(int currInstruction) {
 		this.currInstruction=currInstruction;
 	}
-	public ProcessorState executeNextInstruction() {
+	public ProcessState executeNextInstruction() {
 		currInstruction++;
-		ProcessorState result=currentProc.execute(currInstruction);
+		ProcessState result=currentProc.execute(currInstruction);
 		return result;
 	}
 	public void setCurrentProcess(SimProcess process) {
