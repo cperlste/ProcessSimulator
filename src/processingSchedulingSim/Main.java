@@ -13,16 +13,16 @@ public static void main(String[]args) {
 	fillLists(readyList, blockedList);
 	int instructionIterator=0;
 	for(int x=0; x<3000;x++) {
-		if(readyList.size()!=0) {
-			System.out.println("Step "+(x+1));
+		if(!readyList.isEmpty()) {
+			System.out.print("Step "+(x+1)+": ");
 			ProcessControlBlock currentPCB= readyList.get(0);
 			processor.setCurrentProcess(currentPCB.getCurrentProc());
 			processor.setCurrInstruction(currentPCB.getCurrInstruction());
 			ProcessState state= processor.executeNextInstruction();
 			switch (state){
 			case FINISHED:
-				contextSwitch(processor, blockedList, readyList, currentPCB);
-				finishedList.add(currentPCB);
+				System.out.println("Process "+currentPCB.getCurrentProc().toString()+" finished.");
+				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
 			case READY:
@@ -30,16 +30,14 @@ public static void main(String[]args) {
 				currentPCB.setCurrInstruction(processor.getCurrInstruction());
 				if(instructionIterator==QUANTUM) {
 					System.out.println("***Quantum Expired***");
-					readyList.add(currentPCB);
-					readyList.remove(currentPCB);
-					contextSwitch(processor, blockedList, readyList, currentPCB);
+					contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 					instructionIterator=0;
 				}
 				break;
 			case BLOCKED:
 				blockedList.add(currentPCB);
 				System.out.println("***Process Blocked***");
-				contextSwitch(processor, blockedList, readyList, currentPCB);
+				contextSwitch(processor, blockedList, readyList, currentPCB, state, finishedList);
 				instructionIterator=0;
 				break;
 			default:
@@ -56,8 +54,69 @@ public static void main(String[]args) {
 		}
 			wakeupProcess(blockedList, readyList);
 		}
+	System.out.print("Finished Processes: ");
+	for(int w=0; w<finishedList.size(); w++) {
+		finishedList.get(w).getCurrentProc().toString();
+	}
+	System.exit(0);
 	}
 
+
+
+private static void contextSwitch(SimProcessor processor, ArrayList<ProcessControlBlock> blockedList,
+	ArrayList<ProcessControlBlock> readyList, ProcessControlBlock currentPCB, ProcessState state, ArrayList<ProcessControlBlock> finishedList) {
+	
+	currentPCB.setCurrInstruction(processor.getCurrInstruction());
+	switch(state) {
+	case FINISHED:
+		finishedList.add(currentPCB);
+		readyList.remove(currentPCB);
+		break;
+	case READY:
+		readyList.add(currentPCB);
+		readyList.remove(currentPCB);
+		break;
+	case BLOCKED:
+		blockedList.add(currentPCB);
+		readyList.remove(currentPCB);
+		break;
+	default:
+		break;
+	}	
+	currentPCB.setRegister1(processor.getRegister1());
+	currentPCB.setRegister2(processor.getRegister2());
+	currentPCB.setRegister3(processor.getRegister3());
+	currentPCB.setRegister4(processor.getRegister4());
+	System.out.println("***Context Switch: saving process "+currentPCB.getCurrentProc().toString()+"\n\t Instruction "+ 
+	processor.getCurrInstruction()+ " R1: "+currentPCB.getRegister1()+" R2: "+currentPCB.getRegister2()+" R3: "
+			+currentPCB.getRegister3()+ " R4: "+currentPCB.getRegister4());
+	if(readyList.isEmpty()) {
+		System.out.println("Processor is idling");
+		wakeupProcess(blockedList, readyList);
+	}
+	else {
+		ProcessControlBlock toRestore=readyList.get(0);
+		restore(toRestore);
+	}
+}
+
+private static void wakeupProcess(ArrayList<ProcessControlBlock> blockedList,
+		ArrayList<ProcessControlBlock> readyList) {
+	Random randomGen= new Random();
+	for(int y=0; y<blockedList.size(); y++) {
+		if(randomGen.nextDouble()<.3) {
+			readyList.add(blockedList.get(y));
+			blockedList.remove(y);
+		}
+	}
+	
+}
+
+private static void restore(ProcessControlBlock toRestore) {
+	System.out.println("***Context Switch: restoring process "+toRestore.getCurrentProc().toString()+"\n\t Instruction "+ 
+			toRestore.getCurrInstruction()+ " R1: "+toRestore.getRegister1()+" R2: "+toRestore.getRegister2()+" R3: "
+					+toRestore.getRegister3()+ " R4: "+toRestore.getRegister4());
+}
 private static void fillLists(ArrayList<ProcessControlBlock> readyList, ArrayList<ProcessControlBlock>blockedList) {
 	SimProcess process1= new SimProcess(1, "Word", 100);
 	ProcessControlBlock pcb1= new ProcessControlBlock(process1);
@@ -149,51 +208,6 @@ private static void fillLists(ArrayList<ProcessControlBlock> readyList, ArrayLis
 	else {
 		readyList.add(pcb10);
 	}
-}
-
-private static void contextSwitch(SimProcessor processor, ArrayList<ProcessControlBlock> blockedList,
-	ArrayList<ProcessControlBlock> readyList, ProcessControlBlock currentPCB) {
-	contextSwitchSave(currentPCB, processor, blockedList, readyList);
-	if(readyList.isEmpty()) {
-		System.out.println("Processor is idling");
-		wakeupProcess(blockedList, readyList);
-	}
-	else {
-		ProcessControlBlock toRestore=readyList.get(0);
-		contextSwitchRestore(toRestore);
-	}
-}
-
-private static void wakeupProcess(ArrayList<ProcessControlBlock> blockedList,
-		ArrayList<ProcessControlBlock> readyList) {
-	Random randomGen= new Random();
-	for(int y=0; y<blockedList.size(); y++) {
-		if(randomGen.nextDouble()<.3) {
-			readyList.add(blockedList.get(y));
-			blockedList.remove(y);
-		}
-	}
-	
-}
-
-private static void contextSwitchRestore(ProcessControlBlock toRestore) {
-	System.out.println("***Context Switch: restoring process "+toRestore.getCurrentProc().toString()+"\n\t Instruction "+ 
-			toRestore.getCurrInstruction()+ " R1: "+toRestore.getRegister1()+" R2: "+toRestore.getRegister2()+" R3: "
-					+toRestore.getRegister3()+ " R4: "+toRestore.getRegister4());
-}
-
-private static void contextSwitchSave(ProcessControlBlock currentPCB, SimProcessor processor, ArrayList<ProcessControlBlock>blockedList, ArrayList<ProcessControlBlock> readyList) {
-	currentPCB.setCurrInstruction(processor.getCurrInstruction());
-	blockedList.add(currentPCB);
-	readyList.remove(currentPCB);
-	currentPCB.setRegister1(processor.getRegister1());
-	currentPCB.setRegister2(processor.getRegister2());
-	currentPCB.setRegister3(processor.getRegister3());
-	currentPCB.setRegister4(processor.getRegister4());
-	System.out.println("***Context Switch: saving process "+currentPCB.getCurrentProc().toString()+"\n\t Instruction "+ 
-	processor.getCurrInstruction()+ " R1: "+currentPCB.getRegister1()+" R2: "+currentPCB.getRegister2()+" R3: "
-			+currentPCB.getRegister3()+ " R4: "+currentPCB.getRegister4());
-	
 }
 	
 }
